@@ -1,0 +1,71 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class HillCipher {
+public:
+    HillCipher(vector<vector<int>> key) {
+        key_ = key;
+        inv_key_ = get_inverse(key_);
+    }
+
+    string encrypt(string plaintext) {
+        string ciphertext;
+        for (int i = 0; i < plaintext.size(); i += 2) {
+            vector<int> block = {plaintext[i] - 'a', plaintext[i + 1] - 'a'};
+            vector<int> cipher_block = multiply_key(block, key_);
+            ciphertext += cipher_block[0] + 'a';
+            ciphertext += cipher_block[1] + 'a';
+        }
+        return ciphertext;
+    }
+
+    string decrypt(string ciphertext) {
+        string plaintext;
+        for (int i = 0; i < ciphertext.size(); i += 2) {
+            vector<int> block = {ciphertext[i] - 'a', ciphertext[i + 1] - 'a'};
+            vector<int> plain_block = multiply_key(block, inv_key_);
+            plaintext += plain_block[0] + 'a';
+            plaintext += plain_block[1] + 'a';
+        }
+        return plaintext;
+    }
+
+private:
+    vector<vector<int>> key_;
+    vector<vector<int>> inv_key_;
+
+    vector<vector<int>> get_inverse(vector<vector<int>> key) {
+        int det = key[0][0] * key[1][1] - key[0][1] * key[1][0];
+        int inv_det = 1;
+        while ((det * inv_det) % 26 != 1) {
+            inv_det += 26;
+        }
+        vector<vector<int>> inv_key = {{inv_det * key[1][1] % 26, -inv_det * key[0][1] % 26},
+                                       {-inv_det * key[1][0] % 26, inv_det * key[0][0] % 26}};
+        return inv_key;
+    }
+
+    vector<int> multiply_key(vector<int> block, vector<vector<int>> key) {
+        vector<int> result(2);
+        result[0] = (key[0][0] * block[0] + key[0][1] * block[1]) % 26;
+        result[1] = (key[1][0] * block[0] + key[1][1] * block[1]) % 26;
+        return result;
+    }
+};
+
+int main() {
+    vector<vector<int>> key = {{3, 5}, {7, 2}}; // 2x2 key matrix
+    HillCipher cipher(key);
+
+    string plaintext = "helloworld";
+    string ciphertext = cipher.encrypt(plaintext);
+    cout << "Ciphertext: " << ciphertext << endl;
+
+    string decrypted_text = cipher.decrypt(ciphertext);
+    cout << "Decrypted text: " << decrypted_text << endl;
+
+    return 0;
+}
