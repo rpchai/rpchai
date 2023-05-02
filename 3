@@ -1,0 +1,36 @@
+data()
+
+head(mtcars)
+noofrows=nrow(mtcars)
+noofcolumns=ncol(mtcars)
+print("no of rows:")
+print(noofrows)
+print("no of columns:")
+print(noofcolumns)
+
+
+d<-data.frame(mtcars)
+print(d)
+manual<-0
+automatic<-0
+
+x<-nrow(mtcars)
+print(x)
+
+for(i in 1:x)
+  ifelse ((d[i,9]==1) ,(manual=manual+1), (automatic=automatic+1))
+ifelse (automatic > manual, print("more auto"), print("more manual"))
+print(manual)
+print(automatic)
+h<-d[,4]
+w<-d[,6]
+scatter.smooth(h, w)
+
+
+am<-as.integer(d$am)
+cyl<-as.integer(d$cyl)
+vs<-as.integer(d$vs)
+newmtc<-data.frame(am, cyl, vs)
+print(newmtc)
+
+subset(d, cyl<5)
