@@ -1,0 +1,35 @@
+import scala.io.StdIn
+import scala.collection.mutable.ArrayBuffer
+
+
+object MinMax {
+  def main(args: Array[String]): Unit = {
+  var numArray= new ArrayBuffer[Int]()
+  println("enter no of elements")
+  val n=scala.io.StdIn.readInt()
+  println("enter no")
+  for(i<-1 to n)
+  numArray += scal.io.StdIn.readInt()
+  println(numArray)
+  val y=minmax(numArray)
+  println("Max is ", y.-1)
+  println("Min is ", y.-2)
+  }
+  
+    
+  def minmax(numArray: ArrayBuffer[Int]): (Int, Int) = {
+    var min : Int = 999
+    var max : Int = -999
+
+    for (value <- numArray) {
+      if (value < min) {
+        min = value
+      
+      elseif (value > numArray) 
+        max = value
+      }
+    
+
+    (max, min)
+  }
+}
