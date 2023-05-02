@@ -12,8 +12,8 @@ object MinMax {
   numArray += scal.io.StdIn.readInt()
   println(numArray)
   val y=minmax(numArray)
-  println("Max is ", y.-1)
-  println("Min is ", y.-2)
+  println("Max is ", y._1)
+  println("Min is ", y._2)
   }
   
     
@@ -32,4 +32,5 @@ object MinMax {
 
     (max, min)
   }
+}
 }
