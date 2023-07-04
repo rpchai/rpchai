@@ -2,27 +2,33 @@ data()
 head(mtcars)
 
 
-rownum <- nrow(mtcars)
-colnum <- ncol(mtcars)
+row <- nrow(mtcars)
+col <- ncol(mtcars)
+print("no of row")
+print(row)
+print("no of col")
+print(col)
 
-x<- data.frame(mtcars)
+d<- data.frame(mtcars)
+print(d)
 automatic <-0
 manual <-0
-
-for (i in 1:rownum)
-  ifelse( x[i,9] == 1, automatic <- automatic + 1, manual <- manual +1)
+x<-nrow(mtcars)
+for (i in 1:x)
+  ifelse( d[i,9] == 1, automatic <- automatic + 1, manual <- manual +1)
 ifelse (automatic > manual,
         print("There are more automatic transmission type"),
         print("There are more manual transmission type") )
 
-HorsePower <- x[,4]
-Weight <- x[,6]
-scatter.smooth(HorsePower,Weight, span=2/3, degree = 1, family =c("symmetric","gaussian"))
 
-Mpg <- x[,1]
-hist(Mpg, breaks = 12, col ="lightblue", border = "pink")
+hp <- d[,4]
+wt <- d[,6]
+scatter.smooth(hp,wt)
 
-x[,2]<- as.integer(x[,2])
-x[,8]<- as.integer(x[,8])
-x[,9]<- as.integer(x[,9])
-x[,2] <= 5
+
+am<- as.integer(d$am)
+cyl<- as.integer(d$cyl)
+vs<- as.integer(d$vs)
+newmtc<-data.frame(am, cyl, vs)
+print(newmtc)
+subset(d, cyl<5)
