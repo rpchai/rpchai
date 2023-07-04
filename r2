@@ -33,20 +33,18 @@ print("The Employee detials are as follows")
 print(Emp)
 
 
-write.csv(Emp,"/home/student/Desktop")
 
-readStudent=read.csv("/home/student/Desktop")
+write.csv(Emp,"p22.csv")
+
+readStudent=read.csv("p22.csv")
+readStudent
 
 print("Enter a new row")
-u<- readline(prompt = "EmpId")
-n<- readline(prompt = "EmpName")
-m<- readline(prompt = "EmpCode")
-A<- readline(prompt = "Desig")
-s<- readline(prompt = "Dept")
-t<- readline(prompt = "DOJ")
-x<- data.frame(u,n,m,A,s,t)
+x<- data.frame(4,"d",44,"xx","r","04-04-2022")
 
 
 
-write.table(x,"/home/student/Desktop",col.names = FALSE, append = T,row.names= T, quote= FALSE, sep = ",")
+write.table(x,"p22.csv",col.names = FALSE, append = T,row.names= T, quote= FALSE, sep = ",")
+readStudent=read.csv("p22.csv")
+readStudent
 
