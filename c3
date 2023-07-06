@@ -1,175 +1,172 @@
 #include <iostream>
 #include <string>
-#include <vector>
-
-using namespace std;
-
-// Function to convert a character to its corresponding numeric value (A=0, B=1, ..., Z=25)
-int charToNum(char c) {
-    return c - 'A';
+using namespace std ;
+int key[3][3] ;
+int mod26(int x)
+{
+	return x >= 0 ? (x%26) : 26-(abs(x)%26) ;
 }
-
-// Function to convert a numeric value to its corresponding character (0=A, 1=B, ..., 25=Z)
-char numToChar(int n) {
-    return 'A' + n;
+int findDet(int m[3][3] , int n)
+{
+	int det;
+	if(n == 2)
+	{
+		det = m[0][0] * m[1][1] - m[0][1]*m[1][0] ;
+	}
+	else if (n == 3)
+	{
+		det = m[0][0]*(m[1][1]*m[2][2] - m[1][2]*m[2][1])  - m[0][1]*(m[1][0]*m[2][2] - m[2][0]*m[1][2] ) + m[0][2]*(m[1][0]*m[2][1] - m[1][1]*m[2][0]);
+	}
+	else det = 0 ;
+	return mod26(det);
 }
+int findDetInverse(int R , int D = 26) 
+{
+	int i = 0 ;
+	int p[100] = {0,1};
+	int q[100] = {0} ; 
 
-// Function to calculate the modular inverse of a number a mod m
-int modInverse(int a, int m) {
-    a = a % m;
-    for (int x = 1; x < m; x++) {
-        if ((a * x) % m == 1) {
-            return x;
-        }
-    }
-    return -1;  // Modular inverse doesn't exist
+	while(R!=0)
+	{
+		q[i] = D/R ;
+		int oldD = D ;
+		D = R ;
+		R = oldD%R ;
+		if(i>1)
+		{
+			p[i] = mod26(p[i-2] - p[i-1]*q[i-2]) ;
+		}
+		i++ ;
+	}
+	if (i == 1) return 1;
+	else return p[i] = mod26(p[i-2] - p[i-1]*q[i-2]) ;
 }
-
-// Function to perform matrix multiplication
-vector<int> matrixMultiply(vector<vector<int>>& keyMatrix, vector<int>& messageVector) {
-    int n = keyMatrix.size();
-    vector<int> result(n, 0);
-
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            result[i] += keyMatrix[i][j] * messageVector[j];
-        }
-        result[i] %= 26;
-    }
-
-    return result;
+void multiplyMatrices(int a[1000][3] , int a_rows , int a_cols ,  int b[1000][3] , int b_rows , int b_cols , int res[1000][3])
+{
+	for(int i=0 ; i < a_rows ; i++)
+	{
+		for(int j=0 ; j < b_cols ; j++)
+		{
+			for(int k=0 ; k < b_rows ; k++)
+			{
+				res[i][j] += a[i][k]*b[k][j] ;
+			}
+			res[i][j] = mod26(res[i][j]) ;
+		}
+	}
 }
-
-// Function to perform Hill cipher encryption
-string encrypt(string message, vector<vector<int>>& keyMatrix) {
-    string encryptedMessage = "";
-    int n = keyMatrix.size();
-
-    // Pad the message with 'X' if its length is not a multiple of n
-    while (message.length() % n != 0) {
-        message += 'X';
-    }
-
-    for (int i = 0; i < message.length(); i += n) {
-        vector<int> messageVector(n, 0);
-        vector<int> encryptedVector;
-
-        // Convert the current block of characters to numeric values
-        for (int j = 0; j < n; j++) {
-            messageVector[j] = charToNum(message[i + j]);
-        }
-
-        // Perform matrix multiplication
-        encryptedVector = matrixMultiply(keyMatrix, messageVector);
-
-        // Convert the encrypted vector back to characters
-        for (int j = 0; j < n; j++) {
-            encryptedMessage += numToChar(encryptedVector[j]);
-        }
-    }
-
-    return encryptedMessage;
+void findInverse(int m[3][3] , int n , int m_inverse[3][3] )
+{
+	int adj[3][3] = {0};
+	int det = findDet(m , n); 
+	int detInverse = findDetInverse(det);
+	if(n==2)
+	{
+		adj[0][0] = m[1][1];
+		adj[1][1] = m[0][0];
+		adj[0][1] = -m[0][1];
+		adj[1][0] = -m[1][0];
+	}
+	else if(n==3)
+	{
+		int temp[5][5] = {0} ;
+	
+		for(int i=0; i<5; i++)
+		{
+			for(int j=0; j<5; j++)
+			{
+				temp[i][j] = m[i%3][j%3] ;
+			}
+		}
+		for(int i=1; i<=3 ; i++)
+		{
+			for(int j=1; j<=3 ; j++)
+			{
+				adj[j-1][i-1] = temp[i][j]*temp[i+1][j+1] - temp[i][j+1]*temp[i+1][j];
+			}
+		}
+	}
+	for(int i=0; i<n ; i++)
+	{
+		for(int j=0; j<n ; j++)
+		{
+			m_inverse[i][j] = mod26(adj[i][j] * detInverse) ;
+		}
+	}
 }
-
-// Function to perform Hill cipher decryption
-string decrypt(string encryptedMessage, vector<vector<int>>& keyMatrix) {
-    string decryptedMessage = "";
-    int n = keyMatrix.size();
-    int determinant = 0;
-
-    // Calculate the determinant of the key matrix
-    if (n == 2) {
-        determinant = keyMatrix[0][0] * keyMatrix[1][1] - keyMatrix[0][1] * keyMatrix[1][0];
-    } else if (n == 3) {
-        determinant = keyMatrix[0][0] * (keyMatrix[1][1] * keyMatrix[2][2] - keyMatrix[1][2] * keyMatrix[2][1])
-                    - keyMatrix[0][1] * (keyMatrix[1][0] * keyMatrix[2][2] - keyMatrix[1][2] * keyMatrix[2][0])
-                    + keyMatrix[0][2] * (keyMatrix[1][0] * keyMatrix[2][1] - keyMatrix[1][1] * keyMatrix[2][0]);
-    }
-
-    // Calculate the modular inverse of the determinant
-    int detInverse = modInverse(determinant, 26);
-
-    // Calculate the adjugate of the key matrix
-    vector<vector<int>> adjugateMatrix(n, vector<int>(n, 0));
-    if (n == 2) {
-        adjugateMatrix[0][0] = keyMatrix[1][1];
-        adjugateMatrix[0][1] = -keyMatrix[0][1];
-        adjugateMatrix[1][0] = -keyMatrix[1][0];
-        adjugateMatrix[1][1] = keyMatrix[0][0];
-    } else if (n == 3) {
-        adjugateMatrix[0][0] = keyMatrix[1][1] * keyMatrix[2][2] - keyMatrix[1][2] * keyMatrix[2][1];
-        adjugateMatrix[0][1] = keyMatrix[0][2] * keyMatrix[2][1] - keyMatrix[0][1] * keyMatrix[2][2];
-        adjugateMatrix[0][2] = keyMatrix[0][1] * keyMatrix[1][2] - keyMatrix[0][2] * keyMatrix[1][1];
-        adjugateMatrix[1][0] = keyMatrix[1][2] * keyMatrix[2][0] - keyMatrix[1][0] * keyMatrix[2][2];
-        adjugateMatrix[1][1] = keyMatrix[0][0] * keyMatrix[2][2] - keyMatrix[0][2] * keyMatrix[2][0];
-        adjugateMatrix[1][2] = keyMatrix[0][2] * keyMatrix[1][0] - keyMatrix[0][0] * keyMatrix[1][2];
-        adjugateMatrix[2][0] = keyMatrix[1][0] * keyMatrix[2][1] - keyMatrix[1][1] * keyMatrix[2][0];
-        adjugateMatrix[2][1] = keyMatrix[0][1] * keyMatrix[2][0] - keyMatrix[0][0] * keyMatrix[2][1];
-        adjugateMatrix[2][2] = keyMatrix[0][0] * keyMatrix[1][1] - keyMatrix[0][1] * keyMatrix[1][0];
-    }
-
-    // Calculate the inverse key matrix
-    vector<vector<int>> inverseMatrix(n, vector<int>(n, 0));
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            inverseMatrix[i][j] = (adjugateMatrix[i][j] * detInverse) % 26;
-            if (inverseMatrix[i][j] < 0) {
-                inverseMatrix[i][j] += 26;
-            }
-        }
-    }
-
-    // Decrypt the message
-    for (int i = 0; i < encryptedMessage.length(); i += n) {
-        vector<int> encryptedVector(n, 0);
-        vector<int> decryptedVector;
-
-        // Convert the current block of characters to numeric values
-        for (int j = 0; j < n; j++) {
-            encryptedVector[j] = charToNum(encryptedMessage[i + j]);
-        }
-
-        // Perform matrix multiplication
-        decryptedVector = matrixMultiply(inverseMatrix, encryptedVector);
-
-        // Convert the decrypted vector back to characters
-        for (int j = 0; j < n; j++) {
-            decryptedMessage += numToChar(decryptedVector[j]);
-        }
-    }
-
-    return decryptedMessage;
+string encrypt(string pt, int n)
+{
+	int P[1000][3] = {0} ; 
+	int C[1000][3] = {0} ; 
+	int ptIter = 0  ;
+	while(pt.length()%n != 0)
+	{
+		pt += "x" ;  
+	}
+	int row = (pt.length())/n; 
+	for(int i=0; i<row ; i++)
+	{
+		for(int j=0; j<n; j++)
+		{
+			P[i][j] = pt[ptIter++]-'a' ;
+		}
+	}
+	multiplyMatrices(P, row , n , key , n , n , C) ;
+	string ct = "" ;
+	for(int i=0 ; i<row ; i++)
+	{
+		for(int j=0 ; j<n ;j++)
+		{
+			ct += (C[i][j] + 'a');
+		}
+	}
+	return ct ;
 }
-
-int main() {
-    string message;
-    vector<vector<int>> keyMatrix;
-    int n;
-
-    cout << "Enter the message to encrypt: ";
-    getline(cin, message);
-
-    cout << "Enter the dimension of the key matrix: ";
-    cin >> n;
-
-    cout << "Enter the key matrix (row by row):\n";
-    for (int i = 0; i < n; i++) {
-        vector<int> row;
-        for (int j = 0; j < n; j++) {
-            int element;
-            cin >> element;
-            row.push_back(element);
-        }
-        keyMatrix.push_back(row);
-    }
-
-    // Encrypt the message
-    string encryptedMessage = encrypt(message, keyMatrix);
-    cout << "Encrypted message: " << encryptedMessage << endl;
-
-    // Decrypt the message
-    string decryptedMessage = decrypt(encryptedMessage, keyMatrix);
-    cout << "Decrypted message: " << decryptedMessage << endl;
-
-    return 0;
+string decrypt(string ct, int n)
+{
+	int P[1000][3] = {0} ; 
+	int C[1000][3] = {0} ; 
+	int ctIter = 0 ;
+	int row = ct.length()/n; 
+	for(int i=0; i<row ; i++)
+	{
+		for(int j=0; j<n; j++)
+		{
+			C[i][j] = ct[ctIter++]-'a' ;
+		}
+	}
+	int k_inverse[3][3] = {0};
+	findInverse(key, n , k_inverse);
+	multiplyMatrices(C, row , n , k_inverse , n , n , P) ;
+	string pt = "" ;
+	for(int i = 0 ; i<row ; i++)
+	{
+		for(int j=0 ; j<n ; j++)
+		{
+			pt += (P[i][j] + 'a');
+		}
+	}
+	return pt ;
+}
+int main(void)
+{
+	string pt ;
+	int n ;
+	cout << "Enter the text to be encrypted    : " ;
+	cin >> pt;
+	cout << "Enter order of key matrix : ";
+	cin >> n ;
+	cout<<"Enter key matrix: " <<endl;
+	for(int i=0; i<n; i++)
+	{
+		for(int j=0; j<n; j++)
+		{
+			cin >> key[i][j];
+		}
+	}
+	cout << "\nOriginal text  : " << pt << endl;
+	string ct = encrypt(pt, n) ;
+	cout << "Encrypted text : " << ct << endl;
+	string dt = decrypt(ct, n);
+	cout << "Decrypted text : " << dt << endl;
 }
