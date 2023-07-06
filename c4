@@ -1,51 +1,50 @@
-#include<bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <cctype>
 using namespace std;
-
-string generatekey(string str,string key)
-{
-    int x=str.size();
-    for(int i=0;;i++)
-    {
-        if(x==i)
-            i=0;
-        if( key.size() ==str.size())
-            break;
-        key.push_back(key[i]);
+string removeNonAlphabetic(const string& message) {
+    string result = "";
+    for (char c : message) {
+        if (isalpha(c)) {
+            result += toupper(c);
+        }
     }
-    return key;
+    return result;
 }
-string cipher_text(string str,string key)
-{
-    string cipher;
-    for(int i=0;i<str.size();i++)
-    {
-        char x=(str[i]+key[i])%26;
-        x+='A';
-        cipher.push_back(x);
+string encryptVigenere(const string& message, const string& key) {
+    string encryptedMessage = "";
+    string cleanedMessage = removeNonAlphabetic(message);
+    string cleanedKey = removeNonAlphabetic(key);
+    int keyIndex = 0;
+    for (char c : cleanedMessage) {
+        char encryptedChar = (c - 'A' + cleanedKey[keyIndex] - 'A') % 26 + 'A';
+        encryptedMessage += encryptedChar;
+        keyIndex = (keyIndex + 1) % cleanedKey.length();
     }
-    return cipher;
+    return encryptedMessage;
 }
-string origional_text(string str,string key)
-{
-    string origional;
-    for(int i=0;i<str.size();i++)
-    {
-        char x=(str[i]-key[i]+26)%26;
-        x+='A';
-        origional.push_back(x);
+string decryptVigenere(const string& encryptedMessage, const string& key) {
+    string decryptedMessage = "";
+    string cleanedMessage = removeNonAlphabetic(encryptedMessage);
+    string cleanedKey = removeNonAlphabetic(key);
+    int keyIndex = 0;
+    for (char c : cleanedMessage) {
+        char decryptedChar = (c - 'A' - (cleanedKey[keyIndex] - 'A') + 26) % 26 + 'A';
+        decryptedMessage += decryptedChar;
+        keyIndex = (keyIndex + 1) % cleanedKey.length();
     }
-    return origional;
+    return decryptedMessage;
 }
-int main()
-{
-    string key,str,cipher;
-    cout<<"enter plaintext";
-    cin>>str;
-    cout<<"enter key";
-    cin>>key;
-    key=generatekey(str,key);
-    cipher=cipher_text(str,key);
-    cout<<"encrypted"<<cipher<<endl;
-    cout<<"decrypted"<<origional_text(cipher,key)<<endl;
-
+int main() {
+    string message;
+    string key;
+    cout << "Enter the message to encrypt: ";
+    cin >> message;
+    cout << "Enter the encryption key: ";
+    cin >> key;
+    string encryptedMessage = encryptVigenere(message, key);
+    cout << "Encrypted message: " << encryptedMessage << endl;
+    string decryptedMessage = decryptVigenere(encryptedMessage, key);
+    cout << "Decrypted message: " << decryptedMessage << endl;
+    return 0;
 }
